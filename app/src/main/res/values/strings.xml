@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BluetoothArmController</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action">Choose action to send to Arduino...</string>
+    <string name="clear"> </string>
+
+</resources>
