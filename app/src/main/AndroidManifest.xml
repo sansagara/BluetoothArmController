@@ -16,6 +16,10 @@
             </intent-filter>
         </activity>
     </application>
+    // Required for communicating with the Myo and Arduino device
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    // Required for sending usage data to Thalmic Labs
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

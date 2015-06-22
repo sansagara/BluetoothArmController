@@ -3,7 +3,16 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="myo_connect">Connect Myo</string>
     <string name="action">Choose action to send to Arduino...</string>
+
+    <string name="arm_left">Arm Left</string>
+    <string name="arm_right">Arm Right</string>
+    <string name="pose_fist">Closed Fist</string>
+    <string name="pose_wavein">Waving In!</string>
+    <string name="pose_waveout">Waving Out!</string>
+    <string name="pose_fingersspread">Rock On!</string>
+
     <string name="clear"> </string>
 
 </resources>

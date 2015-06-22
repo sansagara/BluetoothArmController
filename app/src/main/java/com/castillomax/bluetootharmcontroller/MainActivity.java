@@ -21,6 +21,13 @@ package com.castillomax.bluetootharmcontroller;
     import android.widget.Button;
     import android.widget.Toast;
 
+    import com.thalmic.myo.AbstractDeviceListener;
+    import com.thalmic.myo.DeviceListener;
+    import com.thalmic.myo.Hub;
+    import com.thalmic.myo.Myo;
+    import com.thalmic.myo.Pose;
+    import com.thalmic.myo.scanner.ScanActivity;
+
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = "bluetooth1";
@@ -40,6 +47,17 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Para el MYO
+        Hub hub = Hub.getInstance();
+        if (!hub.init(this)) {
+            Log.e(TAG, "Could not initialize the Hub.");
+            finish();
+            return;
+        }
+        Hub.getInstance().setLockingPolicy(Hub.LockingPolicy.NONE);
+        Hub.getInstance().addListener(mListener);
+
+        //Para los Botones
         btnOn = (Button) findViewById(R.id.openFist);
         btnOff = (Button) findViewById(R.id.closeFist);
 
@@ -56,9 +74,10 @@ public class MainActivity extends ActionBarActivity {
         btnOff.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 sendData(11);
-                Toast.makeText(getBaseContext(), "Closing FIst...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "Closing Fist...", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
@@ -126,19 +145,13 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "...In onPause()...");
 
-        if (outStream != null) {
-            try {
-                outStream.flush();
-            } catch (IOException e) {
-                errorExit("Fatal Error", "In onPause() and failed to flush output stream: " + e.getMessage() + ".");
-            }
-        }
-
         try     {
             btSocket.close();
         } catch (IOException e2) {
             errorExit("Fatal Error", "In onPause() and failed to close socket." + e2.getMessage() + ".");
         }
+
+        Hub.getInstance().removeListener(mListener);
     }
 
     private void checkBTState() {
@@ -194,10 +207,60 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.myo_connect) {
+            Intent intent = new Intent(this, ScanActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    private DeviceListener mListener = new AbstractDeviceListener() {
+        @Override
+        public void onConnect(Myo myo, long timestamp) {
+            Toast.makeText(getBaseContext(), "Myo Connected!", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onDisconnect(Myo myo, long timestamp) {
+            Toast.makeText(getBaseContext(), "Myo Disconnected!", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onPose(Myo myo, long timestamp, Pose pose) {
+            Toast.makeText(getBaseContext(), "Pose: " + pose, Toast.LENGTH_SHORT).show();
+            switch (pose) {
+                case UNKNOWN:
+                    Toast.makeText(getBaseContext(), R.string.hello_world, Toast.LENGTH_SHORT).show();
+                    break;
+                case REST:
+                case DOUBLE_TAP:
+                    switch (myo.getArm()) {
+                        case LEFT:
+                            Toast.makeText(getBaseContext(), R.string.arm_left, Toast.LENGTH_SHORT).show();
+                            break;
+                        case RIGHT:
+                            Toast.makeText(getBaseContext(), R.string.arm_right, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                    break;
+                case FIST:
+                    Toast.makeText(getBaseContext(), R.string.pose_fist, Toast.LENGTH_SHORT).show();
+                    break;
+                case WAVE_IN:
+                    Toast.makeText(getBaseContext(), R.string.pose_wavein, Toast.LENGTH_SHORT).show();
+                    break;
+                case WAVE_OUT:
+                    Toast.makeText(getBaseContext(), R.string.pose_waveout, Toast.LENGTH_SHORT).show();
+                    break;
+                case FINGERS_SPREAD:
+                    Toast.makeText(getBaseContext(), R.string.pose_fingersspread, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+        }
+    };
+
 }
+
